@@ -3,12 +3,10 @@
 using namespace std;
 class Alphabet {
 private:
-	string alpha_str;
+	string choice_string;
 	int get_random_number();
-	bool has_alpha_upper(string result);
-	bool has_alpha_lower(string result);
-	bool has_number(string result);
-	bool has_symbol(string result);
+	bool check_memebership(string alphabet_constant, string result);
+	bool check_all_alphabets(string result);
 public:
 	Alphabet();
 	string get_password(int length);

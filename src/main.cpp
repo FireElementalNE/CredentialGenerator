@@ -9,6 +9,10 @@ int main(int argc, char ** argv) {
 	}
 	Alphabet a = Alphabet();
 	int length = atoi(argv[1]);
+	if(length < 8) {
+		cerr << "This password is too small." << endl;
+		exit(EXIT_FAILURE);
+	}
 	cout << a.get_password(length) << endl;
 	exit(EXIT_SUCCESS);
 }

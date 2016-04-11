@@ -3,17 +3,31 @@
 #include <string.h>
 #include <openssl/rand.h>
 #include "alphabet.h"
+#include "constants.h"
 using namespace std;
-Alphabet::Alphabet() {bool has_alpha_upper(string result);
-	bool has_alpha_lower(string result);
-	bool has_number(string result);
-	bool has_symbol(string result);
-	alpha_str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ1234567890!@#$^&*()_+=-|?/\\";
+
+Alphabet::Alphabet() {
+	choice_string = ALPHA_LOWER + ALPHA_UPPER + NUMBERS;
 }
-bool Alphabet::has_alpha_upper(string result) {}
-bool Alphabet::has_alpha_lower(string result) {}
-bool Alphabet::has_number(string result) {}
-bool Alphabet::has_symbol(string result) {}
+
+bool Alphabet::check_memebership(string alphabet_constant, string result) {
+	for(int i = 0; i < result.size(); i++) {
+		for(int j = 0; j < alphabet_constant.size(); j++) {
+			if(result[i] == alphabet_constant[j]) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+bool Alphabet::check_all_alphabets(string result) {
+	bool upper_test = check_memebership(ALPHA_UPPER, result);
+	bool lower_test = check_memebership(ALPHA_LOWER, result);
+	bool num_test = check_memebership(NUMBERS, result);
+	// need to think more on this.
+	// return upper_test && lower_test && num_test;
+	return true;
+}
 int Alphabet::get_random_number() {
 	char * rand_msg = new char[1];
 	int rc = RAND_bytes((unsigned char *)rand_msg, 1);
@@ -25,7 +39,7 @@ int Alphabet::get_random_number() {
   if(x < 0) {
   	x = x * -1;
   }
-  x = x % alpha_str.size();
+  x = x % choice_string.size();
   return x;
 }
 string Alphabet::get_password(int length) {
@@ -33,11 +47,8 @@ string Alphabet::get_password(int length) {
 	do {
 		out_str = "";
 		for(int i = 0; i < length; i++) {
-			out_str += alpha_str[get_random_number()];
+			out_str += choice_string[get_random_number()];
 		}
-	} while(!has_alpha_upper(out_str) 
-				|| !has_alpha_lower(out_str) 
-				|| !has_number(out_str) 
-				|| !has_symbol(out_str));
+	} while(!check_all_alphabets(out_str));
 	return out_str;
 }
