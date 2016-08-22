@@ -7,7 +7,7 @@
 using namespace std;
 
 Alphabet::Alphabet() {
-	choice_string = ALPHA_LOWER + ALPHA_UPPER + NUMBERS;
+	choice_string = CHAR_ALL;
 }
 
 bool Alphabet::check_memebership(string alphabet_constant, string result) {

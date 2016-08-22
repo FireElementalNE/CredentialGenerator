@@ -1,3 +1,6 @@
-extern const std::string ALPHA_LOWER;
-extern const std::string ALPHA_UPPER;
-extern const std::string NUMBERS;
+#define ALPHA_LOWER "abcdefghijklmnopqrstuvwxyz"
+#define ALPHA_UPPER "ABCDEFGHIJKLMNPQRSTUVWXYZ"
+#define NUMBERS "0123456789"
+#define CHAR_ALL "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ0123456789"
+#define NOUN_FILE "nouns"
+#define ADJ_FILE "adjectives"
