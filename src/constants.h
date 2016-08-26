@@ -2,5 +2,5 @@
 #define ALPHA_UPPER "ABCDEFGHIJKLMNPQRSTUVWXYZ"
 #define NUMBERS "0123456789"
 #define CHAR_ALL "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ0123456789"
-#define NOUN_FILE "nouns"
-#define ADJ_FILE "adjectives"
+#define NOUN_FILE "../res/nouns"
+#define ADJ_FILE "../res/adjectives"
