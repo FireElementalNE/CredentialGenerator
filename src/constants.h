@@ -1,6 +1,5 @@
-#define ALPHA_LOWER "abcdefghijklmnopqrstuvwxyz"
-#define ALPHA_UPPER "ABCDEFGHIJKLMNPQRSTUVWXYZ"
-#define NUMBERS "0123456789"
-#define CHAR_ALL "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ0123456789"
 #define NOUN_FILE "../res/nouns"
 #define ADJ_FILE "../res/adjectives"
+#define MIN_CHAR 32
+#define MAX_CHAR 126
+#define MAX_CPY 256
