@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-g -Wall -std=c++11
+CFLAGS=-g -Wall -std=c++14
 CRYPTO_FLAGS=-lssl -lcrypto 
 OBJ=alphabet.o username.o
 all: main
