@@ -21,6 +21,7 @@ char Alphabet::get_random_char() {
     if(x < 0) {
     	x = x * -1;
     }
+	delete rand_msg;
     return (char)((x % (MAX_CHAR-MIN_CHAR + 1)) + MIN_CHAR);
 }
 

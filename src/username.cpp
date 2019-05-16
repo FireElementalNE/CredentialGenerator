@@ -50,5 +50,6 @@ int Username::get_random_number(int modulus) {
   	x = x * -1;
   }
   x = x % modulus;
+  delete rand_msg;
   return x;
 }
