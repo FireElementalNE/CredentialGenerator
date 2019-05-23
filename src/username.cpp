@@ -1,10 +1,12 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
-#include <openssl/rand.h>
 #include <fstream>
 #include "username.h"
 #include "constants.h"
+
+extern int rand_int();
+
 using namespace std;
 Username::Username() {
   ifstream nfile;
@@ -39,17 +41,10 @@ string Username::get_username_str() {
 }
 
 int Username::get_random_number(int modulus) {
-	char * rand_msg = new char[1];
-	int rc = RAND_bytes((unsigned char *)rand_msg, 1);
-	if(rc == 0) {
-		cerr << "crypto: failed." << endl;
-		exit(EXIT_FAILURE);
-  }
-  int x = *rand_msg;
+  int x = rand_int();
   if(x < 0) {
   	x = x * -1;
   }
   x = x % modulus;
-  delete rand_msg;
   return x;
 }
