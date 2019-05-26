@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
-#include <openssl/rand.h>
+// #include <openssl/rand.h>
 #include <sstream>
 #include "alphabet.h"
 #include "constants.h"
