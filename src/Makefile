@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-g -Wall 
 ifneq ($(OS),Windows_NT)
-	CFLAGS += -std=c++14 -lssl -lcrypto
+	CFLAGS += -std=c++17 -lssl -lcrypto
 endif
 OBJ=utils.o alphabet.o username.o
 all: main
