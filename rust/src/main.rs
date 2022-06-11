@@ -1,6 +1,6 @@
 use anyhow::Result;
 use rust_cred_gen::{alphabet, username};
-use rust_cred_gen::args::{ADJ_ARG, AppArgs, LEN_ARG, NOUN_ARG};
+use rust_cred_gen::args::{AppArgs, LEN_ARG};
 
 fn main() -> Result<()> {
     let args = AppArgs::new();
@@ -8,8 +8,6 @@ fn main() -> Result<()> {
     println!("Username: {}",
              username::Username::new(
                  rng.next_u64(),
-                 args.get_argument::<String>(NOUN_ARG)?,
-                 args.get_argument::<String>(ADJ_ARG)?
              )?.make_username()?
     );
     println!("Password: {}",

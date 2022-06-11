@@ -12,14 +12,6 @@ pub mod args {
             .arg(Arg::new(LEN_ARG)
                      .required(true)
                      .help("Length of the password"),
-            )
-            .arg(Arg::new(NOUN_ARG)
-                 .required(true)
-                 .help("A text file containing nouns (newline delimited)"),
-            )
-            .arg(Arg::new(ADJ_ARG)
-                .required(true)
-                .help("A text file containing adjectives (newline delimited)"),
             );
         app.get_matches()
     }
@@ -39,6 +31,41 @@ pub mod args {
                 .parse::<T>()?;
             Ok(arg)
         }
+    }
+}
+
+pub mod resources {
+    use std::ops::Deref;
+    use rust_embed::RustEmbed;
+    use anyhow::{Result, Context};
+    pub const ADJ_FILE: &str = "adjectives";
+    pub const NOUN_FILE: &str = "nouns";
+    #[derive(RustEmbed)]
+    #[folder = "../res/"]
+    pub struct Asset;
+    fn get_file(filename: &str) -> Result<Vec<String>> {
+        let err_msg = format!("Could not get font {filename}");
+        let raw: rust_embed::EmbeddedFile = Asset::get(filename).context(err_msg)?;
+        let a =
+            raw.data
+                .deref()
+                .to_vec()
+                .iter()
+                .map(|e| {
+                    *e as char
+                }).collect::<Vec<char>>()
+                .into_iter()
+                .collect::<String>()
+                .split("\n")
+                .map(str::to_string)
+                .collect::<Vec<String>>();
+        Ok(a)
+    }
+    pub fn get_nouns() -> Result<Vec<String>> {
+        Ok(get_file(NOUN_FILE)?)
+    }
+    pub fn get_adjs() -> Result<Vec<String>> {
+        Ok(get_file(ADJ_FILE)?)
     }
 }
 
@@ -71,9 +98,8 @@ pub mod utils {
 }
 
 pub mod username {
-    use std::fs::File;
-    use std::io::{BufRead, BufReader};
     use anyhow::{Context, Result};
+    use crate::resources::{get_adjs, get_nouns};
     use crate::utils::{index_err, IndexGen};
 
     pub enum SizeType {
@@ -100,32 +126,17 @@ pub mod username {
         }
         Ok(String::from_iter(arr))
     }
-    fn lines_from_file(filename: String) -> Result<Vec<String>> {
-        let file: File = File::open(filename)?;
-        let buf: BufReader<File> = BufReader::new(file);
-        let res = buf.lines().filter_map(|line| {
-            match line {
-                Ok(l) => {
-                    Some(l)
-                }
-                Err(_) => {
-                    None
-                }
-            }
-        }).collect::<Vec<String>>();
-        Ok(res)
-    }
     pub struct Username {
         ig: IndexGen,
         nouns: Vec<String>,
         adjs: Vec<String>,
     }
     impl Username {
-        pub fn new(seed: u64, nfile: String, afile: String) -> Result<Username> {
+        pub fn new(seed: u64) -> Result<Username> {
             let un = Username {
                 ig: IndexGen::new(seed),
-                nouns: lines_from_file(nfile)?,
-                adjs: lines_from_file(afile)?
+                nouns: get_nouns()?,
+                adjs: get_adjs()?
             };
             Ok(un)
         }
