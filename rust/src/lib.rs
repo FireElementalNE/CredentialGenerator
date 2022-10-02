@@ -1,36 +1,11 @@
 pub mod args {
-    use std::str::FromStr;
-    use anyhow::Result;
-    use clap::{Arg, ArgMatches, Command};
-    pub const LEN_ARG: &str = "length";
-    pub const NOUN_ARG: &str = "nouns";
-    pub const ADJ_ARG: &str = "adjectives";
-    fn get_args() -> ArgMatches {
-        let app = Command::new("Credential Gen")
-            .version(env!("CARGO_PKG_VERSION"))
-            .about("Generate a random username and password")
-            .arg(Arg::new(LEN_ARG)
-                     .required(true)
-                     .help("Length of the password"),
-            );
-        app.get_matches()
-    }
-    pub struct AppArgs {
-        am: ArgMatches
-    }
-    impl AppArgs {
-        pub fn new() -> Self {
-            Self {
-                am: get_args(),
-            }
-        }
-        pub fn get_argument<T>(&self, arg_name: &str) -> Result<T, T::Err> where T: FromStr {
-            let arg = self.am
-                .value_of(arg_name)
-                .expect(format!("Argument {arg_name} not present").as_str())
-                .parse::<T>()?;
-            Ok(arg)
-        }
+    use clap::Parser;
+    #[derive(Parser)]
+    #[clap(author, version, about, long_about = "Generate a random username and password.")]
+    pub struct Cli {
+        /// Length of the password
+        #[clap(value_parser)]
+        pub length: u32,
     }
 }
 
@@ -94,7 +69,6 @@ pub mod utils {
     pub fn index_err(name: &str) -> String {
         format!("Could not fetch index from {}", name)
     }
-
 }
 
 pub mod username {
@@ -130,30 +104,32 @@ pub mod username {
         ig: IndexGen,
         nouns: Vec<String>,
         adjs: Vec<String>,
+        pub un: String,
     }
     impl Username {
         pub fn new(seed: u64) -> Result<Username> {
             let un = Username {
                 ig: IndexGen::new(seed),
                 nouns: get_nouns()?,
-                adjs: get_adjs()?
+                adjs: get_adjs()?,
+                un: "".to_string()
             };
             Ok(un)
         }
 
-        pub fn make_username(&mut self) -> Result<String> {
+        pub fn make_username(&mut self) -> Result<()> {
             let noun = title_case(
                 self.nouns.get(
                     self.ig.gen_index::<usize>(self.nouns.len() as u32)?
                 )
-                .context(index_err("nouns"))?.to_string())?;
-            let mut adj  = title_case(
+                    .context(index_err("nouns"))?.to_string())?;
+            let adj  = title_case(
                 self.adjs.get(
-                self.ig.gen_index::<usize>(self.adjs.len() as u32)?
+                    self.ig.gen_index::<usize>(self.adjs.len() as u32)?
                 )
-                .context(index_err("adjs"))?.to_string())?;
-            adj.push_str(&noun);
-            Ok(adj.to_string())
+                    .context(index_err("adjs"))?.to_string())?;
+            self.un = adj + noun.as_str();
+            Ok(())
         }
     }
 }
@@ -164,33 +140,56 @@ pub mod alphabet {
 
     const VALID_CHARS: [u8; 82] =
         [48, 49, 50, 51, 52, 53, 54, 55, 56,
-        57, 33, 34, 35, 36, 37, 38, 40, 41, 42, 43, 44, 45, 46, 58, 59, 60, 61,
-        62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
-        80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 97, 98, 99, 100, 101, 102,
-        103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116,
-        117, 118, 119, 120, 121, 122];
+            57, 33, 34, 35, 36, 37, 38, 40, 41, 42, 43, 44, 45, 46, 58, 59, 60, 61,
+            62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
+            80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 97, 98, 99, 100, 101, 102,
+            103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116,
+            117, 118, 119, 120, 121, 122];
 
     pub struct Alphabet {
         ig: IndexGen,
+        pub pw: String,
 
     }
     impl Alphabet {
         pub fn new(seed: u64) -> Alphabet {
             Alphabet {
                 ig: IndexGen::new(seed),
+                pw: "".to_string()
             }
         }
-        pub fn make_password(&mut self, length: u32) -> Result<String> {
-            let mut outstr: String = String::new();
+        fn create_pw(&mut self, length: u32) -> Result<String> {
+            let mut out_str: String = String::new();
             for _ in 0..length {
                 let index = self.ig.gen_index::<usize>(VALID_CHARS.len() as u32)?;
                 let my_char = ((
                     *VALID_CHARS.get(index)
                         .context(index_err("VALID_CHARS"))? as u8
                 ) as char).to_string();
-                outstr.push_str(&my_char)
+                out_str.push_str(&my_char)
             }
-            Ok(outstr)
+            Ok(out_str)
+        }
+        fn check_pw_reqs(pw: &str) -> bool {
+            pw.chars()
+                .map(|c|c.is_numeric())
+                .fold(false, |x, y| y || x) &&
+                pw.chars()
+                    .map(|c|c.is_uppercase())
+                    .fold(false, |x, y| y || x) &&
+                pw.chars()
+                    .map(|c|c.is_lowercase())
+                    .fold(false, |x, y| y || x) &&
+                pw.chars()
+                    .map(|c| !c.is_alphanumeric())
+                    .fold(false, |x, y| y || x)
+        }
+        pub fn make_password(&mut self, length: u32) -> Result<()> {
+            self.pw = self.create_pw(length)?;
+            while ! (Self::check_pw_reqs(self.pw.as_str())) {
+                self.pw = self.create_pw(length)?;
+            }
+            Ok(())
         }
     }
 }
